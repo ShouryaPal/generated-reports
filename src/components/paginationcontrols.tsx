@@ -1,6 +1,5 @@
-// PaginationControls.tsx
 "use client";
-import type { FC } from "react";
+import { type FC, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { data } from "../../data/data";
@@ -25,9 +24,12 @@ const PaginationControls: FC<PaginationControlsProps> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = searchParams.get("page") ?? "1";
-  const perPage = searchParams.get("per_page") ?? "10";
-  const totalPages = Math.ceil(data.length / Number(perPage));
-  const maxPageButtons = 5; // Adjust this value to change the number of page buttons displayed
+  const defaultPerPage = searchParams.get("per_page") ?? "10";
+  const totalPages = Math.ceil(data.length / Number(defaultPerPage));
+  const maxPageButtons = 5;
+
+  const [selectedPageSize, setSelectedPageSize] =
+    useState<string>(defaultPerPage);
 
   function getPageNumbers(
     currentPage: number,
@@ -36,21 +38,27 @@ const PaginationControls: FC<PaginationControlsProps> = ({
   ) {
     const pageNumbers = [];
     const maxPages = Math.min(maxPageButtons, totalPages);
-
     let startPage = Math.max(1, currentPage - Math.floor((maxPages - 1) / 2));
     const endPage = Math.min(totalPages, startPage + maxPages - 1);
-
     if (endPage - startPage < maxPages - 1) {
       startPage = endPage - maxPages + 1;
     }
-
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
     return pageNumbers;
   }
+
   const pageNumbers = getPageNumbers(Number(page), totalPages, maxPageButtons);
+  const perPage = selectedPageSize;
+
+  const handlePageSizeChange = (value: string) => {
+    setSelectedPageSize(value);
+    const searchParams = new URLSearchParams();
+    searchParams.set("page", "1");
+    searchParams.set("per_page", value);
+    router.push(`/?${searchParams.toString()}`);
+  };
 
   return (
     <div className="flex items-center gap-8">
@@ -60,11 +68,13 @@ const PaginationControls: FC<PaginationControlsProps> = ({
           className=" text-gray-800 font-bold cursor-pointer"
           disabled={!hasPrevPage}
           onClick={() => {
-            router.push(`/?page=${Number(page) - 1}&per_page=${perPage}`);
+            const searchParams = new URLSearchParams();
+            searchParams.set("page", `${Number(page) - 1}`);
+            searchParams.set("per_page", perPage);
+            router.push(`/?${searchParams.toString()}`);
           }}
         >
-          <ChevronFirst />
-          Prev
+          <ChevronFirst /> Prev
         </Button>
         {pageNumbers.map((pageNumber) => (
           <Button
@@ -72,7 +82,10 @@ const PaginationControls: FC<PaginationControlsProps> = ({
             variant={Number(page) === pageNumber ? "outline" : "ghost"}
             className="font-bold cursor-pointer rounded-md border-gray-400 text-gray-400 hover:bg-red-500 focus-visible:bg-red-500 hover:text-white focus-visible:text-white"
             onClick={() => {
-              router.push(`/?page=${pageNumber}&per_page=${perPage}`);
+              const searchParams = new URLSearchParams();
+              searchParams.set("page", `${pageNumber}`);
+              searchParams.set("per_page", perPage);
+              router.push(`/?${searchParams.toString()}`);
             }}
           >
             {pageNumber}
@@ -83,18 +96,20 @@ const PaginationControls: FC<PaginationControlsProps> = ({
           className="text-gray-800 font-bold cursor-pointer"
           disabled={!hasNextPage}
           onClick={() => {
-            router.push(`/?page=${Number(page) + 1}&per_page=${perPage}`);
+            const searchParams = new URLSearchParams();
+            searchParams.set("page", `${Number(page) + 1}`);
+            searchParams.set("per_page", perPage);
+            router.push(`/?${searchParams.toString()}`);
           }}
         >
-          Next
-          <ChevronLast />
+          Next <ChevronLast />
         </Button>
       </div>
       <div className="flex items-center">
         <h1 className="text-gray-800 block">Rows per page</h1>
-        <Select>
+        <Select value={selectedPageSize} onValueChange={handlePageSizeChange}>
           <SelectTrigger>
-            <SelectValue />
+            <SelectValue>{selectedPageSize}</SelectValue>
           </SelectTrigger>
           <SelectContent side="top">
             {[10, 20, 30, 40, 50].map((pageSize) => (
