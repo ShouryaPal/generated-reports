@@ -105,8 +105,8 @@ const PaginationControls: FC<PaginationControlsProps> = ({
           Next <ChevronLast />
         </Button>
       </div>
-      <div className="flex items-center">
-        <h1 className="text-gray-800 block">Rows per page</h1>
+      <div className="grid grid-cols-2 gap-1 place-items-center">
+        <p className="text-gray-800">Rows per page</p>
         <Select value={selectedPageSize} onValueChange={handlePageSizeChange}>
           <SelectTrigger>
             <SelectValue>{selectedPageSize}</SelectValue>
