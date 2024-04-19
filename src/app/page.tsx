@@ -12,7 +12,7 @@ export default function Home({
   // biome-ignore lint/complexity/useLiteralKeys: <explanation>
   const page = searchParams["page"] ?? "1";
   // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-  const perPage = searchParams["per_page"] ?? "5";
+  const perPage = searchParams["per_page"] ?? "10";
   const start = (Number(page) - 1) * Number(perPage);
   const end = start + Number(perPage);
 
